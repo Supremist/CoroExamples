@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <cppcoro/generator.hpp>
 
 struct CoroutineFrame
 {
@@ -52,4 +53,14 @@ int main(int argc, char *argv[])
 		std::cout << coro.next() << " ";
 	}
 	std::cout << std::endl;
+
+	auto f = []() -> cppcoro::generator<float>
+	{
+	    co_yield 42.f;
+	    co_yield 101.66f;
+    };
+
+	for (auto i : f()) {
+		std::cout << i << std::endl;
+	}
 }

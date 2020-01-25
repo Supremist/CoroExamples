@@ -13,5 +13,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt5Core)
 
+add_library(cppcoro STATIC IMPORTED)
+set_property(TARGET cppcoro PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/cppcoro/build/windows_x64_msvc15_debug/lib/cppcoro.lib")
+target_include_directories(cppcoro INTERFACE "${PROJECT_SOURCE_DIR}/cppcoro/include")
+
 add_executable(CoroExamples main.cpp)
-target_link_libraries(CoroExamples Qt5::Core)
+target_compile_options(CoroExamples PRIVATE "/AWAIT")
+target_link_libraries(CoroExamples cppcoro Qt5::Core)
