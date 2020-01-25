@@ -3,13 +3,7 @@
 
 struct CoroutineFrame
 {
-	enum class State {
-		Initial,
-		Body,
-		Final
-	};
-
-	State state;
+	int state;
 	int i = 0;
 };
 
@@ -25,25 +19,28 @@ struct Resumable
 Resumable::Resumable()
     : c(std::make_shared<CoroutineFrame>())
 {
-	c->state = CoroutineFrame::State::Initial;
+	c->state = 0;
 }
 
 bool Resumable::resume()
 {
+#define co_yield(val)    \
+	c->state = __LINE__; \
+	return val;          \
+	case __LINE__:       \
+	;
+
 	switch(c->state) {
-	case CoroutineFrame::State::Initial:
+	case 0:
 		std::cout << "Coroutine: Starting" << std::endl;
-		c->state = CoroutineFrame::State::Body;
-		return true;
-	case CoroutineFrame::State::Body:
+		co_yield(true)
 		std::cout << "Coroutine: Executing body" << std::endl;
-		c->state = CoroutineFrame::State::Final;
-		return true;
-	case CoroutineFrame::State::Final:
+		co_yield(true)
 		std::cout << "Coroutine: Finalizing" << std::endl;
-		return false;
+		co_yield(false)
 	}
 	return false;
+#undef co_yield
 }
 
 int main(int argc, char *argv[])
