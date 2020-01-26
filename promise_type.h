@@ -11,6 +11,8 @@ struct promise_type
   void return_void() {/**/}
   void return_value(value_type val) {/**/}
 
+  awaitable yield_value(value_type val) {/**/}
+
   void unhandled_exception() {/**/}
 
 };

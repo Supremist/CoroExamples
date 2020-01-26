@@ -26,6 +26,12 @@ struct Promise {
 //		value = 0;
 //	}
 
+	auto yield_value(int val)
+	{
+		value = val;
+		return std::experimental::suspend_always();
+	}
+
 	void unhandled_exception()
 	{
 		ex = std::current_exception();
@@ -44,35 +50,38 @@ struct Promise {
 	}
 
 	std::string msg;
-	int value;
+	int value = 0;
 	std::exception_ptr ex;
 };
 
 namespace std::experimental {
 template<>
-struct coroutine_traits<Promise::CoroHandle> {
+struct coroutine_traits<Promise::CoroHandle, int> {
 	using promise_type = Promise;
 };
 }
 
 
-Promise::CoroHandle myFirstCoroutine()
+Promise::CoroHandle myFirstCoroutine(int yieldCount)
 {
-	std::cout << "Hello" << std::endl;
-	co_await std::experimental::suspend_always();
-	std::cout << "Coroutine" << std::endl;
-	throw std::logic_error("Life has no meaning");
-	co_await std::experimental::suspend_always();
+//	std::cout << "Hello" << std::endl;
+//	co_await std::experimental::suspend_always();
+//	std::cout << "Coroutine" << std::endl;
+//	//throw std::logic_error("Life has no meaning");
+//	co_await std::experimental::suspend_always();
 	std::cout << "Calculating the meaning of life" << std::endl;
+	for (auto i = 0; i < yieldCount; ++i) {
+		co_yield i;
+	}
 	co_return 42.2;
 }
 
 int main(int argc, char *argv[])
 {
-	auto coro = myFirstCoroutine();
+	auto coro = myFirstCoroutine(5);
 	while (!coro.done()) {
-		std::cout << "Main: (doing useful work)" << std::endl;
 		coro.resume();
+		std::cout << "Yield: " << coro.promise().value << std::endl;
 	}
 	if (!coro.promise().ex) {
 		std::cout << "The meaning of life is: " << coro.promise().value << std::endl;
