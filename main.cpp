@@ -5,7 +5,7 @@ struct Promise {
 	using CoroHandle = std::experimental::coroutine_handle<Promise>;
 	CoroHandle get_return_object() { return CoroHandle::from_promise(*this); }
 	auto initial_suspend() { return std::experimental::suspend_never(); }
-	auto final_suspend() { return std::experimental::suspend_never(); }
+	auto final_suspend() { return std::experimental::suspend_always(); }
 	void return_value(int val) { value = val; }
 
 	int value;
@@ -32,8 +32,9 @@ Promise::CoroHandle myFirstCoroutine()
 int main(int argc, char *argv[])
 {
 	auto coro = myFirstCoroutine();
-	std::cout << "Main: (doing useful work)" << std::endl;
-	coro.resume();
-	coro.resume();
+	while (!coro.done()) {
+		std::cout << "Main: (doing useful work)" << std::endl;
+		coro.resume();
+	}
 	std::cout << "The meaning of life is: " << coro.promise().value << std::endl;
 }
