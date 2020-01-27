@@ -1,8 +1,11 @@
 #include "FakeDevice.h"
+#include "AsyncDevice.h"
 
+#include <QCoreApplication>
+#include <QDebug>
+#include <QTimer>
 #include <iostream>
 #include <memory>
-#include <QDebug>
 
 void checkIoStatus(DeviceInterface::IOStatus ioStatus) {
 	if (ioStatus != DeviceInterface::IOStatus::Success) {
@@ -35,7 +38,7 @@ QString getFile(DeviceInterface &device, int fileId)
 	return result.data;
 }
 
-int main(int argc, char *argv[])
+void readBlocking()
 {
 	DeviceInterface::UPtr device = std::make_unique<FakeDevice>();
 	try {
@@ -43,4 +46,30 @@ int main(int argc, char *argv[])
 	} catch (const std::exception &ex) {
 		qCritical() << "Exception: " << ex.what();
 	}
+}
+
+int main(int argc, char *argv[])
+{
+	QCoreApplication a(argc, argv);
+	AsyncDevice asyncReader(std::make_unique<FakeDevice>());
+	QObject::connect(&asyncReader, &AsyncDevice::success, &a, [&a] (QString fileData){
+		qDebug() << "Read file data:" << fileData;
+		a.quit();
+	});
+	QObject::connect(&asyncReader, &AsyncDevice::failed, &a, [&a] (QString errorMsg){
+		qCritical() << "Exception: " << errorMsg;
+		a.quit();
+	});
+
+	asyncReader.startReadFile(10);
+
+	int progress = 0;
+	QTimer progressTimer;
+	progressTimer.setSingleShot(false);
+	progressTimer.setInterval(1000);
+	QObject::connect(&progressTimer, &QTimer::timeout, &a, [&progress] {
+		qDebug() << "Progress:" << progress++;
+	});
+	progressTimer.start();
+	return a.exec();
 }
