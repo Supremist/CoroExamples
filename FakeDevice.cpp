@@ -151,3 +151,15 @@ QString conversions::toString(const DeviceInterface::ReplyResult &val)
 {
 	return QString("ReplyResult{%1, %2}").arg(toString(val.status)).arg(toString(val.reply));
 }
+
+void checkIoStatus(DeviceInterface::IOStatus ioStatus) {
+	if (ioStatus != DeviceInterface::IOStatus::Success) {
+		throw std::logic_error(conversions::toString(ioStatus).toStdString());
+	}
+}
+
+void checkFileStatus(FileStatus fileStatus) {
+	if (fileStatus != FileStatus::Success) {
+		throw std::logic_error(conversions::toString(fileStatus).toStdString());
+	}
+}

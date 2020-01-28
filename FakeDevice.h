@@ -49,3 +49,7 @@ QString toString(T val) {
 }
 }
 
+void checkIoStatus(DeviceInterface::IOStatus ioStatus);
+
+void checkFileStatus(FileStatus fileStatus);
+

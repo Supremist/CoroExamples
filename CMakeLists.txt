@@ -29,6 +29,8 @@ add_executable(CoroExamples
 	FakeDevice.cpp
 	AsyncDevice.h
 	AsyncDevice.cpp
+	CoroDevice.h
+	CoroDevice.cpp
 	main.cpp)
 target_compile_options(CoroExamples PRIVATE "/AWAIT")
 target_link_libraries(CoroExamples cppcoro Qt5::Core)
